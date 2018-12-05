@@ -2,7 +2,7 @@
 class DSU(object):
     def __init__(self, m, n):
         all_ = m*n
-        self.par = range(all_)
+        self.par = [-1]*all_
         self.rnk = [0]*all_
     def find(self, x):
         if self.par[x] != x:
@@ -19,7 +19,9 @@ class DSU(object):
                 self.par[yr] = xr 
                 self.rnk[xr] +=1
                                 
-class Solution(object):
+
+                
+class Solution(object):         
     def numIslands2(self, m, n, positions):
         """
         :type m: int
@@ -27,29 +29,53 @@ class Solution(object):
         :type positions: List[List[int]]
         :rtype: List[int]
         """
-        dic = DSU(m,n)
-        count = 0
-        list_ = []
+        par = [-1]*(m*n)
+        rnk = [0]*(m*n)
+
+        def find(x):
+            if par[x] != x:
+                par[x] = find(par[x])
+            return par[x]
+        
+        def union(x, y): 
+            xr,yr = find(x), find(y)
+            if xr != yr:
+                if rnk[xr] > rnk[yr]:
+                    par[yr] = xr 
+                elif rnk[xr] < rnk[yr]:
+                    par[xr] = yr
+                else:
+                    par[yr] = xr 
+                    rnk[xr] +=1
+        cnt = 0
+        res = []
         for i, node in enumerate(positions):
             x,y = node
-            past_points=positions[:i+1]
-            if [x+1,y] in past_points and x+1<m:
-                dic.union((x*n+y), (x+1)*n+y)
-            if [x-1,y] in past_points and x-1>=0:
-                dic.union((x*n+y), (x-1)*n+y)
-            if [x,y+1] in past_points and y+1<n:
-                dic.union((x*n+y), (x)*n+y+1)
-            if [x,y-1] in past_points and y-1>=0:
-                dic.union((x*n+y), (x)*n+y-1)
-            ll=set()
-            for node1 in past_points:
-                x1,y1 = node1
-                ll.add(dic.find(x1*n+y1))                    
-            list_.append(len(ll))
-        return (list_)
-            
-            
-            
+            value = x*n+y
+            if par[value] == -1:
+                par[value] = value
+                cnt +=1
+                
+            if  x+1<m and par[value+n] != -1:
+                if find(value) != find(value+n):
+                    union(value, value+n)
+                    cnt -=1
+            if  x-1>=0 and par[value-n] != -1:
+                if find(value) != find(value-n):
+                    union(value, value-n)
+                    cnt -=1
+            if  y+1<n and par[value+1]  != -1:
+                if find(value) != find(value+1):
+                    union(value, value+1)
+                    cnt -=1
+            if  y-1>=0 and par[value-1] != -1:
+                if find(value) != find(value-1):
+                    union(value, value-1)
+                    cnt -=1
+            res.append(cnt)
+       
+        return res
+                        
 
                     
                 
@@ -64,6 +90,9 @@ print(l)
 positions = [[0,0],[1,1],[0,1]]
 l=f.numIslands2(2, 2, positions)
 
+
+positions = [[8,5],[8,0],[3,4],[0,3],[1,0],[5,4],[0,8],[5,7],[0,6],[6,2],[4,7],[2,7],[8,7],[8,6],[5,3],[2,3],[3,5],[3,1],[0,2],[8,8],[6,4],[0,1],[0,4],[7,5],[3,0]]
+l=f.numIslands2(9, 9, positions)
 print(l)
 # positions = [[0,1], [0,0]]
 # f.numIslands2(1, 2, positions)
